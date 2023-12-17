@@ -4,13 +4,28 @@
 #include <iostream>
 #include <string>
 
+class Obj
+{
+public:
+	Obj()=default;
+	~Obj();
+	double d;
+	char c;
+};
+
+Obj::~Obj(){}
+
 template <class T>
 class Comporator
 {
 public:
 	Comporator() = default;
 	~Comporator();
-	bool operator()(T x, T y)
+	bool operator()(Obj x , Obj y)
+	{
+		return (x.d > y.d) ? true : (x.d < y.d) ? false : (x.c > y.c) ? true : false;
+	}
+	bool operator()(int x, int y)
 	{
 		return (x > y) ? true : false;
 	}
@@ -24,7 +39,7 @@ class HP
 {
 public:
 	HP() = default;
-	HP(T* vec,int size, Comporator<T> comporator, bool status);
+	HP(T* vec2,int size, Comporator<T> comporator, bool status);
 	~HP();
 	int Size{ 0 }, MS{ 1 };
 	T* vec = new T[MS];
@@ -45,9 +60,43 @@ HP<T>::~HP()
 }
 
 template<class T>
-HP<T>::HP(T* vec, int size, Comporator<T> comporator, bool status)
+HP<T>::HP(T* vec2, int size, Comporator<T> comporator, bool status)
 {
-	//
+	for (int index = 0; index < size; ++index)
+	{
+		if (this->Size != this->MS)
+		{
+			this->vec[this->Size] = vec2[index];
+			++this->Size;
+		}
+		else
+		{
+			this->MS *= 2;
+			T* copy_val = this->vec;
+			this->vec = nullptr;
+			this->vec = new T[this->MS];
+			for (int index2 = 0; index2 < this->Size; ++index2)
+			{
+				this->vec[index2] = copy_val[index2];
+			}
+			this->vec[this->Size] = vec2[index];
+			++this->Size;
+			copy_val = nullptr;
+			delete[] copy_val;
+		}
+		if (this->Size != 1)
+		{
+			int index = this->Size - 1;
+			if (status)
+			{
+				this->HP_Up(index, comporator);	
+			}
+			else
+			{
+				this->HP_Down(index, comporator);
+			}
+		}
+	}
 }
 
 template<class T>
@@ -201,12 +250,46 @@ void HP<T>::HP_Down(int index, Comporator<T> comporator)
 template<class T>
 void HP<T>::Sort(Comporator<T> comporator)
 {
+	int size2 = this->Size;
+	int max = this->vec[0];
+	int max_index = 0;
+	for (int index = 0; index < size2;--size2)
+	{
+		for (int index2 = 0; index2 < size2; ++index2)
+		{
+			if (this->vec[index2] > max)
+			{
+				max = this->vec[index2];
+				max_index = index2;
+			}
+		}
+		HP_Up(max_index, comporator);
+		T value = this->vec[0];
+		this->vec[0] = this->vec[size2 - 1];
+		this->vec[size2 - 1] = value;
+		max = this->vec[0];
+		max_index = 0;
+	}
+}
+
+void C_Sort(int* vec2,int size,int m)
+{
 	//
 }
 
 int main_ints()
 {
-	//
+	int* array1 = new int[6];
+	Comporator<int> comporator;
+	array1[0] = 2;
+	array1[1] = 8;
+	array1[2] = 5;
+	array1[3] = 3;
+	array1[4] = 9;
+	array1[5] = 1;
+	HP <int>* bh = new HP<int>(array1,6,comporator, true);
+	bh->Sort(comporator);
+	bh->Print();
 	return 0;
 }
 
