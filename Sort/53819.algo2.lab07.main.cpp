@@ -3,6 +3,7 @@
 // ki53819@zut.edu.pl
 #include <iostream>
 #include <string>
+#include <vector>
 
 class Obj
 {
@@ -272,24 +273,59 @@ void HP<T>::Sort(Comporator<T> comporator)
 	}
 }
 
-void C_Sort(int* vec2,int size,int m)
+void C_Sort(int* vec2, int size, int m)
 {
-	//
+	std::vector<int> vec3;
+	std::vector<int> res;
+	for (int index = 0; index < m; ++index)
+	{
+		vec3.push_back(0);
+		res.push_back(vec2[index]);
+	}
+	for (int index = 0; index < size; ++index)
+	{
+		int index2 = vec2[index];
+		vec3[index2] += 1;
+	}
+	for (int index = 1; index < m; ++index)
+	{
+		vec3[index] += vec3[index - 1];
+	}
+	for (int index = 0; index < size; ++index)
+	{
+		int index2 = vec2[index];
+		int index3 = vec3[index2] - 1;
+		res[index3] = vec2[index];
+		if (vec3[index2] != 0)
+			vec3[index2] -= 1;
+	}
+	for (int index = 0; index < size; ++index)
+	{
+		vec2[index] = res[index];
+	}
 }
 
 int main_ints()
 {
-	int* array1 = new int[6];
+	int* array1 = new int[7];
 	Comporator<int> comporator;
-	array1[0] = 2;
-	array1[1] = 8;
-	array1[2] = 5;
-	array1[3] = 3;
-	array1[4] = 9;
-	array1[5] = 1;
-	HP <int>* bh = new HP<int>(array1,6,comporator, true);
-	bh->Sort(comporator);
-	bh->Print();
+	array1[0] = 1;
+	array1[1] = 4;
+	array1[2] = 1;
+	array1[3] = 2;
+	array1[4] = 7;
+	array1[5] = 5;
+	array1[6] = 2;
+	for (int index = 0; index < 7; ++index)
+	{
+		std::cout << array1[index] << " ";
+	}
+	std::cout << "\n";
+	C_Sort(array1, 7, 9);
+	for (int index = 0; index < 7; ++index)
+	{
+		std::cout << array1[index] << " ";
+	}
 	return 0;
 }
 
