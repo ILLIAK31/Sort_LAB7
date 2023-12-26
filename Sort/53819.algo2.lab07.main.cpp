@@ -305,6 +305,79 @@ void C_Sort(int* vec2, int size, int m)
 	}
 }
 
+void B_Sort(int* vec2, int size, int m)
+{
+	int Max = vec2[0], Min = vec2[0] , b1_s = 0 , b2_s = 0 , b3_s = 0 , b4_s = 0 , b5_s = 0;
+	for (int index = 0; index < size; ++index)
+	{
+		Max = (vec2[index] > Max)?vec2[index]:Max;
+		Min = (vec2[index] < Min) ? vec2[index] : Min;
+	}
+	int b_size = (Max - Min) / 5;
+	int* b1 = new int[size];
+	int* b2 = new int[size];
+	int* b3 = new int[size];
+	int* b4 = new int[size];
+	int* b5 = new int[size];
+	for (int index = 0; index < size; ++index)
+	{
+		int index2 = int(vec2[index] / b_size);
+		switch (index2)
+		{
+		case 0:
+			b1[b1_s++] = vec2[index];
+			break;
+		case 1:
+			b2[b2_s++] = vec2[index];
+			break;
+		case 2:
+			b3[b3_s++] = vec2[index];
+			break;
+		case 3:
+			b4[b4_s++] = vec2[index];
+			break;
+		case 4:
+			b5[b5_s++] = vec2[index];
+			break;
+		default:
+			b5[b5_s++] = vec2[index];
+			break;
+		}
+	}
+	C_Sort(b1, b1_s, m);
+	C_Sort(b2, b2_s, m);
+	C_Sort(b3, b3_s, m);
+	C_Sort(b4, b4_s, m);
+	C_Sort(b5, b5_s, m);
+	int index2 = 0;
+	for (int index = 0; index < b1_s; ++index)
+	{
+		vec2[index2++] = b1[index];
+	}
+	for (int index = 0; index < b2_s; ++index)
+	{
+		vec2[index2++] = b2[index];
+	}
+	for (int index = 0; index < b3_s; ++index)
+	{
+		vec2[index2++] = b3[index];
+	}
+	for (int index = 0; index < b4_s; ++index)
+	{
+		vec2[index2++] = b4[index];
+	}
+	for (int index = 0; index < b5_s; ++index)
+	{
+		vec2[index2++] = b5[index];
+	}
+}
+
+template <class T>
+void B_Sort(int* vec2,int size, int m, Comporator<T> comporator)
+{
+	//
+}
+
 int main_ints()
 {
 	int* array1 = new int[7];
@@ -321,7 +394,7 @@ int main_ints()
 		std::cout << array1[index] << " ";
 	}
 	std::cout << "\n";
-	C_Sort(array1, 7, 9);
+	B_Sort(array1, 7, 9);
 	for (int index = 0; index < 7; ++index)
 	{
 		std::cout << array1[index] << " ";
