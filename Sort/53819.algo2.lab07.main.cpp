@@ -10,10 +10,13 @@ class Obj
 {
 public:
 	Obj()=default;
+	Obj(double D, char C);
 	~Obj();
 	double d;
 	char c;
 };
+
+Obj::Obj(double D, char C) :d(D), c(C){}
 
 Obj::~Obj(){}
 
@@ -23,13 +26,22 @@ class Comporator
 public:
 	Comporator() = default;
 	~Comporator();
-	bool operator()(T x , T y)
+	bool operator()(int x , int y)
 	{
 		return (x > y) ? true : false;;
 	}
-	bool operator()(int x, int y)
+	bool operator()(double x, double y)
 	{
-		return (x > y) ? true : false;
+		return (x > y) ? true : false;;
+	}
+	bool operator()(Obj* x,Obj* y)
+	{
+		if (x->d > y->d)
+			return true;
+		else if (x->d < y->d)
+			return false;
+		else
+			return (x->c > y->c) ? true : false;
 	}
 };
 
@@ -253,13 +265,13 @@ template<class T>
 void HP<T>::Sort(Comporator<T> comporator)
 {
 	int size2 = this->Size;
-	int max = this->vec[0];
+	T max = this->vec[0];
 	int max_index = 0;
 	for (int index = 0; index < size2;--size2)
 	{
 		for (int index2 = 0; index2 < size2; ++index2)
 		{
-			if (this->vec[index2] > max)
+			if (comporator(this->vec[index2],max))
 			{
 				max = this->vec[index2];
 				max_index = index2;
@@ -306,7 +318,6 @@ void C_Sort(int* vec2, int size, int m)
 	}
 }
 
-template <class T>
 void C_Sort(Obj* vec2, int size, int m,Comporator<char> comparator)
 {
 	std::vector<int> vec3;
@@ -337,34 +348,32 @@ void C_Sort(Obj* vec2, int size, int m,Comporator<char> comparator)
 	{
 		vec2[index] = res[index];
 	}
+
 }
 
 template <class T>
 void C_Sort(Obj* vec2, int size, int m, Comporator<double> comparator)
 {
-	std::vector<int> vec3;
+	std::vector<double> vec3;
 	std::vector<Obj> res;
 	for (int index = 0; index < m; ++index)
 	{
 		vec3.push_back(0);
+	}
+	for (int index = 0; index < size; ++index)
+	{
 		res.push_back(vec2[index]);
 	}
-	for (int index = 0; index < size; ++index)
+	int i, j, min_idx;
+	for (i = 0; i < size - 1; i++) 
 	{
-		int index2 = vec2[index].d*5;
-		vec3[index2] += 1;
-	}
-	for (int index = 1; index < m; ++index)
-	{
-		vec3[index] += vec3[index - 1];
-	}
-	for (int index = 0; index < size; ++index)
-	{
-		int index2 = vec2[index].d*5;
-		int index3 = vec3[index2] - 1;
-		res[index3] = vec2[index];
-		if (vec3[index2] != 0)
-			vec3[index2] -= 1;
+		min_idx = i;
+		for (j = i + 1; j < size; j++) {
+			if (res[j].d < res[min_idx].d)
+				min_idx = j;
+		}
+		if (min_idx != i)
+			std::swap(res[min_idx], res[i]);
 	}
 	for (int index = 0; index < size; ++index)
 	{
@@ -449,16 +458,16 @@ double Key_D(Obj* obj)
 	return obj->d; 
 }
 
-template <class T>
-void B_Sort(T vec2, int size, int m, char(*Key_C)(Obj*), Comporator<char> comporator)
+
+void B_Sort(Obj** vec2, int size, int m, char(*Key_C)(Obj*), Comporator<char> comporator)
 {
-	T Max = &vec2[0];
-	T Min = &vec2[0];
+	Obj* Max = vec2[0];
+	Obj* Min = vec2[0];
 	int b1_s = 0, b2_s = 0, b3_s = 0, b4_s = 0, b5_s = 0;
 	for (int index = 0; index < size; ++index)
 	{
-		Max = (comporator(Key_C(&vec2[index]),Key_C(Max))) ? &vec2[index] : Max;
-		Min = (comporator(Key_C(Min),Key_C(&vec2[index]))) ? &vec2[index] : Min;
+		Max = (comporator(Key_C(vec2[index]),Key_C(Max))) ? vec2[index] : Max;
+		Min = (comporator(Key_C(Min),Key_C(vec2[index]))) ? vec2[index] : Min;
 	}
 	int b_size = (Key_C(Max) - Key_C(Min)) / 5;
 	Obj* b1 = new Obj[size];
@@ -472,67 +481,66 @@ void B_Sort(T vec2, int size, int m, char(*Key_C)(Obj*), Comporator<char> compor
 		{
 			b_size = 1;
 		}
-		int index2 = int(Key_C(&vec2[index]) / b_size);
+		int index2 = int(Key_C(vec2[index]) / b_size);
 		switch (index2)
 		{
 		case 0:
-			b1[b1_s++] = vec2[index];
+			b1[b1_s++] = *vec2[index];
 			break;
 		case 1:
-			b2[b2_s++] = vec2[index];
+			b2[b2_s++] = *vec2[index];
 			break;
 		case 2:
-			b3[b3_s++] = vec2[index];
+			b3[b3_s++] = *vec2[index];
 			break;
 		case 3:
-			b4[b4_s++] = vec2[index];
+			b4[b4_s++] = *vec2[index];
 			break;
 		case 4:
-			b5[b5_s++] = vec2[index];
+			b5[b5_s++] = *vec2[index];
 			break;
 		default:
-			b5[b5_s++] = vec2[index];
+			b5[b5_s++] = *vec2[index];
 			break;
 		}
 	}
-	C_Sort<Obj*>(b1, b1_s, m,comporator);
-	C_Sort<Obj*>(b2, b2_s, m, comporator);
-	C_Sort<Obj*>(b3, b3_s, m, comporator);
-	C_Sort<Obj*>(b4, b4_s, m, comporator);
-	C_Sort<Obj*>(b5, b5_s, m, comporator);
+	C_Sort(b1, b1_s, m,comporator);
+	C_Sort(b2, b2_s, m, comporator);
+	C_Sort(b3, b3_s, m, comporator);
+	C_Sort(b4, b4_s, m, comporator);
+	C_Sort(b5, b5_s, m, comporator);
 	int index2 = 0;
 	for (int index = 0; index < b1_s; ++index)
 	{
-		vec2[index2++] = b1[index];
+		vec2[index2++] = &b1[index];
 	}
 	for (int index = 0; index < b2_s; ++index)
 	{
-		vec2[index2++] = b2[index];
+		vec2[index2++] = &b2[index];
 	}
 	for (int index = 0; index < b3_s; ++index)
 	{
-		vec2[index2++] = b3[index];
+		vec2[index2++] = &b3[index];
 	}
 	for (int index = 0; index < b4_s; ++index)
 	{
-		vec2[index2++] = b4[index];
+		vec2[index2++] = &b4[index];
 	}
 	for (int index = 0; index < b5_s; ++index)
 	{
-		vec2[index2++] = b5[index];
+		vec2[index2++] = &b5[index];
 	}
 }
 
-template <class T>
-void B_Sort(Obj* vec2, int size, int m, double(*Key_D)(Obj*), Comporator<double> comporator)
+void B_Sort(Obj** vec2, int size, int m, double(*Key_D)(Obj*), Comporator<double> comporator)
 {
-	T Max = &vec2[0];
-	T Min = &vec2[0];
+	Obj* Max = vec2[0];
+	Obj* Min = vec2[0];
 	int b1_s = 0, b2_s = 0, b3_s = 0, b4_s = 0, b5_s = 0;
 	for (int index = 0; index < size; ++index)
 	{
-		Max = (comporator(Key_D(&vec2[index]), Key_D(Max))) ? &vec2[index] : Max;
-		Min = (comporator(Key_D(Min), Key_D(&vec2[index]))) ? &vec2[index] : Min;
+		Max = (comporator(Key_D(vec2[index]), Key_D(Max))) ? vec2[index] : Max;
+		Min = (comporator(Key_D(Min), Key_D(vec2[index]))) ? vec2[index] : Min;
 	}
 	int b_size = (Key_D(Max) - Key_D(Min)) / 5;
 	Obj* b1 = new Obj[size];
@@ -542,54 +550,79 @@ void B_Sort(Obj* vec2, int size, int m, double(*Key_D)(Obj*), Comporator<double>
 	Obj* b5 = new Obj[size];
 	for (int index = 0; index < size; ++index)
 	{
-		int index2 = int(Key_D(&vec2[index]) / b_size);
+		int index2 = int(Key_D(vec2[index]) / b_size);
 		switch (index2)
 		{
 		case 0:
-			b1[b1_s++] = vec2[index];
+			b1[b1_s++] = *vec2[index];
 			break;
 		case 1:
-			b2[b2_s++] = vec2[index];
+			b2[b2_s++] = *vec2[index];
 			break;
 		case 2:
-			b3[b3_s++] = vec2[index];
+			b3[b3_s++] = *vec2[index];
 			break;
 		case 3:
-			b4[b4_s++] = vec2[index];
+			b4[b4_s++] = *vec2[index];
 			break;
 		case 4:
-			b5[b5_s++] = vec2[index];
+			b5[b5_s++] = *vec2[index];
 			break;
 		default:
-			b5[b5_s++] = vec2[index];
+			b5[b5_s++] = *vec2[index];
 			break;
 		}
 	}
 	C_Sort<Obj*>(b1, b1_s, m, comporator);
+	for (int q = 0; q < b1_s; ++q)
+	{
+		std::cout << b1[q].d << " ";
+	}
+	std::cout << std::endl;
 	C_Sort<Obj*>(b2, b2_s, m, comporator);
+	for (int q = 0; q < b2_s; ++q)
+	{
+		std::cout << b2[q].d << " ";
+	}
+	std::cout << std::endl;
 	C_Sort<Obj*>(b3, b3_s, m,comporator);
+	for (int q = 0; q < b3_s; ++q)
+	{
+		std::cout << b3[q].d << " ";
+	}
+	std::cout << std::endl;
 	C_Sort<Obj*>(b4, b4_s, m, comporator);
+	for (int q = 0; q < b4_s; ++q)
+	{
+		std::cout << b4[q].d << " ";
+	}
+	std::cout << std::endl;
 	C_Sort<Obj*>(b5, b5_s, m, comporator);
+	for (int q = 0; q < b5_s; ++q)
+	{
+		std::cout << b5[q].d << " ";
+	}
+	std::cout << std::endl;
 	int index2 = 0;
 	for (int index = 0; index < b1_s; ++index)
 	{
-		vec2[index2++] = b1[index];
+		vec2[index2++] = &b1[index];
 	}
 	for (int index = 0; index < b2_s; ++index)
 	{
-		vec2[index2++] = b2[index];
+		vec2[index2++] = &b2[index];
 	}
 	for (int index = 0; index < b3_s; ++index)
 	{
-		vec2[index2++] = b3[index];
+		vec2[index2++] = &b3[index];
 	}
 	for (int index = 0; index < b4_s; ++index)
 	{
-		vec2[index2++] = b4[index];
+		vec2[index2++] = &b4[index];
 	}
 	for (int index = 0; index < b5_s; ++index)
 	{
-		vec2[index2++] = b5[index];
+		vec2[index2++] = &b5[index];
 	}
 }
 
@@ -607,7 +640,50 @@ int main_objs()
 
 int main()
 {
-	//
+	Obj** array = new Obj*[10];
+	Comporator<char> cmpchar;
+	Comporator<double> cmpdouble;
+	Comporator<Obj*> cmpobj;
+	Obj* obj1 = new Obj(1.4,'c');
+	array[0] = obj1;
+	Obj* obj2 = new Obj(1.6, 'a');
+	array[1] = obj2;
+	Obj* obj3 = new Obj(2.4, 'f');
+	array[2] = obj3;
+	Obj* obj4 = new Obj(5.4, 'g');
+	array[3] = obj4;
+	Obj* obj5 = new Obj(1.4, 'n');
+	array[4] = obj5;
+	Obj* obj6 = new Obj(0.04, 'c');
+	array[5] = obj6;
+	Obj* obj7 = new Obj(5.78, 't');
+	array[6] = obj7;
+	Obj* obj8 = new Obj(0.12, 'y');
+	array[7] = obj8;
+	Obj* obj9 = new Obj(1.5, 'q');
+	array[8] = obj9;
+	Obj* obj10 = new Obj(3.9, 'w');
+	array[9] = obj10;
+	for (int i = 0; i < 10; ++i)
+	{
+		std::cout << array[i]->c << " ";
+	}
+	std::cout << std::endl;
+	for (int i = 0; i < 10; ++i)
+	{
+		std::cout << array[i]->d << " ";
+	}
+	std::cout << std::endl;
+	B_Sort(array,10,300,&Key_C,cmpchar);
+	for (int i = 0; i < 10; ++i)
+	{
+		std::cout << array[i]->c << " ";
+	}
+	std::cout << std::endl;
+	for (int i = 0; i < 10; ++i)
+	{
+		std::cout << array[i]->d << " ";
+	}
 	main_ints();
 	main_objs();
     return 0;
