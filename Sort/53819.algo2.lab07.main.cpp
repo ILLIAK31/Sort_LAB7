@@ -660,7 +660,6 @@ int main_ints()
 			break;
 		}
 	}
-	//
 	delete[] vec1;
 	delete[] vec2;
 	delete[] vec3;
@@ -669,13 +668,68 @@ int main_ints()
 
 int main_objs()
 {
+	Comporator<Obj*> comporator_obj;
+	Comporator<double> comporator_double;
+	int n = pow(10, 3);
+	int m = pow(10, 3);
+	Obj** vec1 = new Obj*[n];
+	for (int index = 0; index < n; ++index)
+	{
+		Obj* obj = new Obj();
+		obj->c = 'a' + rand() % 26;
+		obj->d = ((rand() << 15) + rand()) / ((double)pow(2, 30));
+		vec1[index] = obj;
+	}
+	std::cout << "Array 1 : ";
+	for (int index = 0; index < n; ++index)
+	{
+		std::cout << "| ID : " << index+1 << "| D : " << vec1[index]->d << "| C : " << vec1[index]->c <<"\n";
+	}
+	std::cout << std::endl;
+	Obj** vec2 = new Obj * [n];
+	memcpy(vec2, vec1, n * sizeof(Obj*));
+	clock_t timer1 = clock();
+	HP<Obj*>* hp = new HP<Obj*>(vec1, n, comporator_obj, true);
+	hp->Sort(comporator_obj);
+	clock_t timer2 = clock();
+	std::cout << "| Full time : " << (timer2 - timer1) / (double)CLOCKS_PER_SEC << " s |\n";
+	std::cout << "Sorted array 1 : ";
+	for (int index = 0; index < n; ++index)
+	{
+		std::cout << "| ID : " << index + 1 << "| D : " << hp->vec[index]->d << "| C : " << hp->vec[index]->c << "\n";
+	}
+	std::cout << std::endl;
 	//
+	timer1 = clock();
+	B_Sort(vec2, n, 1, &Key_D, comporator_double);
+	timer2 = clock();
+	std::cout << "| Full time : " << (timer2 - timer1) / (double)CLOCKS_PER_SEC << " s |\n";
+	std::cout << "Sorted array 2 : ";
+	for (int index = 0; index < n; ++index)
+	{
+		std::cout << "| ID : " << index + 1 << "| D : " << vec2[index]->d << "| C : " << vec2[index]->c << "\n";
+	}
+	std::cout << std::endl;
+	//
+	std::cout << "Comparing\n";
+	for (int index = 0; index < n; ++index)
+	{
+		if (hp->vec[index]->d == vec2[index]->d)
+			std::cout << vec2[index]->d << "\n";
+		else
+		{
+			std::cout << "Wrong comparison" << "\n";
+			break;
+		}
+	}
+	delete[] vec1;
+	delete[] vec2;
 	return 0;
 }
 
 int main()
 {
-	main_ints();
+	//main_ints();
 	main_objs();
     return 0;
 }
