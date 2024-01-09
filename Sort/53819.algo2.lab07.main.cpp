@@ -322,7 +322,7 @@ void C_Sort(Obj* vec2, int size, int m,Comporator<char> comparator)
 {
 	std::vector<int> vec3;
 	std::vector<Obj> res;
-	for (int index = 0; index < m; ++index)
+	for (int index = 0; index < size; ++index)
 	{
 		vec3.push_back(0);
 		res.push_back(vec2[index]);
@@ -348,7 +348,6 @@ void C_Sort(Obj* vec2, int size, int m,Comporator<char> comparator)
 	{
 		vec2[index] = res[index];
 	}
-
 }
 
 template <class T>
@@ -670,6 +669,7 @@ int main_objs()
 {
 	Comporator<Obj*> comporator_obj;
 	Comporator<double> comporator_double;
+	Comporator<char> comporator_char;
 	int n = pow(10, 3);
 	int m = pow(10, 3);
 	Obj** vec1 = new Obj*[n];
